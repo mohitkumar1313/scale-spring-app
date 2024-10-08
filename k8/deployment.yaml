@@ -18,5 +18,5 @@ spec:
       - name: scale-spring-app
         image: mohitsalgotra/newscale-app:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         
