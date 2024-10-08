@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scale-spring-app
+  labels:
+    app: scale-spring-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scale-spring-app
+  template:
+    metadata:
+      labels:
+        app: scale-spring-app
+    spec:
+      containers:
+      - name: scale-spring-app
+        image: mohitsalgotra/newscale-app:latest
+        ports:
+        - containerPort: 8080
+        
