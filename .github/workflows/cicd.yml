@@ -62,7 +62,7 @@ jobs:
             export DOCKER_PASSWORD=$DOCKER_PASSWORD
           
             # Login to Docker on EC2
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker login -u "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
           
             # Pull the latest Docker image
             docker pull $DOCKER_USERNAME/scale-app:latest
