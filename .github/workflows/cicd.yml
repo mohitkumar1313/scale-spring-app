@@ -1,6 +1,7 @@
 name: CI/CD Pipeline
 on: push
 jobs:
+  # Job 1: Build
   build:
     runs-on: ubuntu-latest
     steps:
@@ -12,6 +13,7 @@ jobs:
           owner: 'mohitkumar1313'
           repository: 'scale-spring-app'
 
+  # Job 2: Build and Publish Docker Image to Docker Hub
   build_publish_docker_hub:
     runs-on: ubuntu-latest
     steps:
@@ -32,8 +34,8 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_NAMESPACE }}/scale-app:latest
-  
-  
+
+  # Job 3: Deploy to EC2
   deploy_to_ec2: 
     runs-on: ubuntu-latest
     needs: build_publish_docker_hub
@@ -58,23 +60,19 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ubuntu@${{ secrets.EC2_IP }} << 'EOF'
-            export DOCKER_USERNAME=$DOCKER_USERNAME
-            export DOCKER_PASSWORD=$DOCKER_PASSWORD
+            export DOCKER_USERNAME="$DOCKER_USERNAME"
+            export DOCKER_PASSWORD="$DOCKER_PASSWORD"
           
             # Login to Docker on EC2
-            docker login -u "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
           
             # Pull the latest Docker image
-            docker pull $DOCKER_USERNAME/scale-app:latest
+            docker pull "$DOCKER_USERNAME/scale-app:latest"
           
             # Stop and remove the existing container if it exists
             docker stop scale-app || true
             docker rm scale-app || true
           
             # Run the new container
-            docker run -d --name scale-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
+            docker run -d --name scale-app -p 8080:8080 "$DOCKER_USERNAME/scale-app:latest"
           EOF
-        
-
-
-         
