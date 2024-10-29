@@ -78,5 +78,5 @@ jobs:
             
             # Run the new container
             echo "Running new container..."
-            docker run -d --name scale-app -p 8080:8080 "$DOCKER_USERNAME/scale-app:latest"
+            docker run -d --name scale-app -p 8081:8081 "$DOCKER_USERNAME/scale-app:latest"
           EOF
