@@ -38,15 +38,16 @@ jobs:
     needs: build_publish_docker_hub
     environment: "prod"
     steps:
-      - name: Add EC2 to known hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.EC2_IP }} >> ~/.ssh/known_hosts
-          
+     
       - name: Add EC2 to known hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.EC2_IP }} >> ~/.ssh/known_hosts
-
+          
+      - name: Add EC2 to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.EC2_IP }} >> ~/.ssh/known_hosts
+          
       - name: Copy SSH Key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
