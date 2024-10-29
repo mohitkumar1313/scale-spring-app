@@ -56,7 +56,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ec2-user@${{ secrets.EC2_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ubuntu@${{ secrets.EC2_IP }} << 'EOF'
             # Login to Docker on EC2
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             
@@ -68,5 +68,5 @@ jobs:
             docker rm my-app || true
             
             # Run the new container
-            docker run -d --name my-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
+            docker run -d --name scale-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
           EOF
