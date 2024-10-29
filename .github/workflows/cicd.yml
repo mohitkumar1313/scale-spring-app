@@ -36,6 +36,7 @@ jobs:
 
   EC2-Deploy:
     runs-on: ubuntu-latest
+    environment: prod 
     needs: [build,build_publish_docker_hub]
     steps:
     - id: deploy
