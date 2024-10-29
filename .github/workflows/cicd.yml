@@ -33,18 +33,40 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_NAMESPACE }}/scale-app:latest
 
-
-  EC2-Deploy:
+  deploy_to_ec2: 
     runs-on: ubuntu-latest
-    environment: prod 
-    needs: [build,build_publish_docker_hub]
+    needs: build_publish_docker_hub
+    environment: "prod"
     steps:
-    - id: deploy
-      uses: bitovi/github-actions-deploy-docker-to-ec2@v1.0.1
-      with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws_default_region: ca-central-1
+      - name: Add EC2 to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.EC2_IP }} >> ~/.ssh/known_hosts
+      
+      - name: Copy SSH Key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/ubuntu.pem
+          chmod 600 ~/.ssh/ubuntu.pem
 
-        aws_elb_app_port: 8080                      
+      - name: Deploy to EC2
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          ssh -i ~/.ssh/ubuntu.pem ec2-user@${{ secrets.EC2_IP }} << 'EOF'
+            # Login to Docker on EC2
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            
+            # Pull the latest Docker image
+            docker pull $DOCKER_USERNAME/scale-app:latest
+            
+            # Stop and remove the existing container if it exists
+            docker stop my-app || true
+            docker rm my-app || true
+            
+            # Run the new container
+            docker run -d --name my-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
+          EOF
+
 
