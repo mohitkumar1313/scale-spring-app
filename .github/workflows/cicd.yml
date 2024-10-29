@@ -21,7 +21,7 @@ jobs:
         uses: zemuldo/docker-build-push@main
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_NAMESPACE: "docker_name_space"
+          DOCKER_NAMESPACE: ${{ secrets.docker_name_space }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           REGISTRY_URL: "docker.io"
         with:
