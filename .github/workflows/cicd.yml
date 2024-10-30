@@ -83,15 +83,16 @@ jobs:
           cat /tmp/ec2_ip.txt
 
       - name: Set EC2 IP in Environment
-        if: success()  # Only if the previous steps succeed
         run: |
-          if [ -f /tmp/ec2_ip.txt ]; then
-            IP=$(cat /tmp/ec2_ip.txt)
-            echo "ec2_ip=${IP}" >> $GITHUB_ENV
+          if [ -s /tmp/ec2_ip.txt ]; then  # Check if the file is not empty
+            ip=$(cat /tmp/ec2_ip.txt)
+            echo "Setting EC2 IP: $ip"
+            echo "ec2_ip=$ip" >> $GITHUB_ENV
           else
-            echo "Error: /tmp/ec2_ip.txt does not exist" >&2
+            echo "Error: /tmp/ec2_ip.txt is empty or does not contain a valid IP" >&2
             exit 1
           fi
+
    
       
          
