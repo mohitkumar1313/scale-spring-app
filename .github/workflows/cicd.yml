@@ -86,11 +86,11 @@ jobs:
         if: success()  # Only if the previous steps succeed
         run: |
           if [ -f /tmp/ec2_ip.txt ]; then
-          IP=$(cat /tmp/ec2_ip.txt)
-          echo "ec2_ip=${IP}" >> $GITHUB_ENV
+            IP=$(cat /tmp/ec2_ip.txt)
+            echo "ec2_ip=${IP}" >> $GITHUB_ENV
           else
-          echo "Error: /tmp/ec2_ip.txt does not exist" >&2
-          exit 1
+            echo "Error: /tmp/ec2_ip.txt does not exist" >&2
+            exit 1
           fi
    
       
