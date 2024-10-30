@@ -74,7 +74,7 @@ jobs:
         id: ec2_ip
         working-directory: terraform
         run: |
-          terraform output -raw instance_ip > ../ec2_ip.txt
+          terraform output -raw instance_public_ip > ../ec2_ip.txt
           echo "::set-output name=ec2_ip::$(cat ../ec2_ip.txt)"
 
   
