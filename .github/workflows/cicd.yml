@@ -73,13 +73,9 @@ jobs:
         run: |
           terraform output -raw instance_public_ip
 
-      - name: Output Instance IP
-        id: ec2_ip
-        working-directory: terraform
+      - name: Output Instance IP to File
         run: |
-          ip=$(terraform output -raw instance_public_ip)
-          echo "Extracted IP: $ip"  # Debugging line
-          echo "$ip" > /tmp/ec2_ip.txt
+          terraform output -raw instance_public_ip > /tmp/ec2_ip.txt
 
       - name: Verify IP in Temporary File
         run: |
@@ -87,14 +83,18 @@ jobs:
           cat /tmp/ec2_ip.txt
 
       - name: Set EC2 IP in Environment
+        if: success()  # Only if the previous steps succeed
         run: |
           if [ -f /tmp/ec2_ip.txt ]; then
-          ip=$(cat /tmp/ec2_ip.txt)
-          echo "ec2_ip=$ip" >> $GITHUB_ENV
+          IP=$(cat /tmp/ec2_ip.txt)
+          echo "ec2_ip=${IP}" >> $GITHUB_ENV
           else
           echo "Error: /tmp/ec2_ip.txt does not exist" >&2
           exit 1
           fi
+   
+      
+         
 
           
   deploy_to_ec2:
