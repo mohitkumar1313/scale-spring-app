@@ -59,21 +59,28 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ca-central-1  
-
-      - name: Initialize Terraform
+      - name: Terraform Init and Refresh
         working-directory: terraform
-        run: terraform init
+        run: |
+          terraform init
+          terraform refresh
 
       - name: Terraform Apply (Provision EC2 Instance)
         working-directory: terraform
-        run: terraform apply -auto-approve
+        run: |
+          terraform init
+          terraform plan -out=tfplan
+          terraform apply -auto-approve tfplan
+          terraform refresh
 
-      - name: Check Terraform Output for Public IP
+      - name: List All Terraform Outputs
         working-directory: terraform
         run: |
-          terraform output -raw instance_public_ip
+          echo "Logging all outputs to confirm presence"
+          terraform output
 
       - name: Output Instance IP to File
+        working-directory: terraform
         run: |
           terraform output -raw instance_public_ip > /tmp/ec2_ip.txt
 
@@ -82,16 +89,7 @@ jobs:
           echo "Contents of /tmp/ec2_ip.txt:"
           cat /tmp/ec2_ip.txt
 
-      - name: Set EC2 IP in Environment
-        run: |
-          if [ -s /tmp/ec2_ip.txt ]; then  # Check if the file is not empty
-            ip=$(cat /tmp/ec2_ip.txt)
-            echo "Setting EC2 IP: $ip"
-            echo "ec2_ip=$ip" >> $GITHUB_ENV
-          else
-            echo "Error: /tmp/ec2_ip.txt is empty or does not contain a valid IP" >&2
-            exit 1
-          fi
+   
 
    
       
