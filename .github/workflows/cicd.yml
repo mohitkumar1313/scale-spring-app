@@ -75,7 +75,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform output -raw instance_public_ip > ../ec2_ip.txt
-          echo "::set-output name=ec2_ip::$(cat ../ec2_ip.txt)"
+          echo "::set-output name=ec2_ip::$(cat ../ec2_ip.txt)" >> $GITHUB_ENV
 
   
   deploy_to_ec2:
@@ -88,7 +88,6 @@ jobs:
 
       - name: Add EC2 to known hosts
         run: |
-          ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
           ssh-keyscan -H "$ec2_ip" >> ~/.ssh/known_hosts
 
       - name: Copy SSH Key
@@ -103,7 +102,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
+          echo "Deploying to EC2 IP: $ec2_ip"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ubuntu@$ec2_ip << 'EOF'
             export DOCKER_USERNAME="${DOCKER_USERNAME}"
             export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
