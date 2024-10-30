@@ -86,11 +86,10 @@ jobs:
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
 
-      - name: Fetch and Set EC2 IP
+      - name: Add EC2 to known hosts
         run: |
-          echo "Setting EC2 IP from Terraform output..."
-          ec2_ip="${{ needs.terraform.outputs.ec2_ip }}"
-          echo "EC2 IP is: $ec2_ip"
+          ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
+          ssh-keyscan -H "$ec2_ip" >> ~/.ssh/known_hosts
 
       - name: Copy SSH Key
         env:
@@ -105,6 +104,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
+          echo "Deploying to EC2 IP: $ec2_ip"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ec2-user@$ec2_ip << 'EOF'
             export DOCKER_USERNAME="${DOCKER_USERNAME}"
             export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
