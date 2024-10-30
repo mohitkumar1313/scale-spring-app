@@ -86,10 +86,11 @@ jobs:
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
 
-      - name: Add EC2 to known hosts
+      - name: Fetch and Set EC2 IP
         run: |
-          ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
-          ssh-keyscan -H "$ec2_ip" >> ~/.ssh/known_hosts
+          echo "Setting EC2 IP from Terraform output..."
+          ec2_ip="${{ needs.terraform.outputs.ec2_ip }}"
+          echo "EC2 IP is: $ec2_ip"
 
       - name: Copy SSH Key
         env:
