@@ -89,6 +89,8 @@ jobs:
         id: set_env_ip
         run: |
           echo "ec2_ip=$(cat ec2_ip.txt)" >> $GITHUB_ENV
+          echo "::set-output name=ec2_ip::$(cat ec2_ip.txt)"
+  
    
   
 
@@ -107,7 +109,7 @@ jobs:
 
       - name: Add EC2 to known hosts
         run: |
-          ssh-keyscan -H "$ec2_ip" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ needs.terraform.outputs.ec2_ip }}" >> ~/.ssh/known_hosts
 
       - name: Copy SSH Key
         env:
