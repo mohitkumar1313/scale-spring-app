@@ -41,6 +41,8 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     needs: build_publish_docker_hub
+    outputs:
+      ec2_ip: ${{ steps.ec2_ip.outputs.ec2_ip }}  # Define outputs at the job level
     steps:
       - name: Checkout Terraform Repository
         uses: actions/checkout@v3
@@ -73,8 +75,7 @@ jobs:
         working-directory: terraform
         run: |
           terraform output -raw instance_ip > ../ec2_ip.txt
-        outputs:
-          ec2_ip: ${{ steps.ec2_ip.outputs.ec2_ip }}
+          echo "::set-output name=ec2_ip::$(cat ../ec2_ip.txt)"
 
   
   deploy_to_ec2:
@@ -87,7 +88,7 @@ jobs:
 
       - name: Add EC2 to known hosts
         run: |
-          ec2_ip=$(cat ec2_ip.txt)
+          ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
           ssh-keyscan -H "$ec2_ip" >> ~/.ssh/known_hosts
 
       - name: Copy SSH Key
@@ -102,8 +103,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          ec2_ip=$(cat ec2_ip.txt)
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ec2-user.pem ec2-user@$ec2_ip << 'EOF'
+          ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ec2-user@$ec2_ip << 'EOF'
             export DOCKER_USERNAME="${DOCKER_USERNAME}"
             export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
 
