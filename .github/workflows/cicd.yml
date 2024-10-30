@@ -85,6 +85,11 @@ jobs:
         run: |
           echo "Contents of ec2_ip.txt:"
           cat ec2_ip.txt
+      - name: Set EC2 IP in Environment
+        id: set_env_ip
+        run: |
+          echo "ec2_ip=$(cat ec2_ip.txt)" >> $GITHUB_ENV
+   
   
 
 
@@ -93,12 +98,15 @@ jobs:
     needs: terraform
     environment: "prod"
     steps:
+      - name: Verify EC2 IP in Environment
+        run: |
+          echo "Deploying to EC2 IP: $ec2_ip" 
+          
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
 
       - name: Add EC2 to known hosts
         run: |
-          echo "Using EC2 IP: $ec2_ip"  # Debugging to ensure IP is being used correctly
           ssh-keyscan -H "$ec2_ip" >> ~/.ssh/known_hosts
 
       - name: Copy SSH Key
