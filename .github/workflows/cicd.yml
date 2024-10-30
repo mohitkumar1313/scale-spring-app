@@ -88,12 +88,16 @@ jobs:
         run: |
           echo "Contents of /tmp/ec2_ip.txt:"
           cat /tmp/ec2_ip.txt
-
-   
-
-   
-      
-         
+      - name: Set EC2 IP in Environment
+        run: |
+          if [ -s /tmp/ec2_ip.txt ]; then  # Check if the file is not empty
+            ip=$(cat /tmp/ec2_ip.txt)
+            echo "Setting EC2 IP: $ip"
+            echo "ec2_ip=$ip" >> $GITHUB_ENV
+          else
+            echo "Error: /tmp/ec2_ip.txt is empty or does not contain a valid IP" >&2
+            exit 1
+          fi 
 
           
   deploy_to_ec2:
@@ -103,7 +107,7 @@ jobs:
     steps:
       - name: Verify EC2 IP in Environment
         run: |
-          echo "Deploying to EC2 IP: $ec2_ip" 
+          echo "Deploying to EC2 IP: ${{ env.ec2_ip }}" 
           
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
