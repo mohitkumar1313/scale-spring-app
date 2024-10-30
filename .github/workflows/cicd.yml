@@ -95,8 +95,8 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/ubuntu.pem
-          chmod 600 ~/.ssh/ubuntu.pem
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/scale-app.pem
+          chmod 600 ~/.ssh/scale-app.pem
 
       - name: Deploy to EC2
         env:
@@ -104,8 +104,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           ec2_ip=${{ needs.terraform.outputs.ec2_ip }}
-          echo "Deploying to EC2 IP: $ec2_ip"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ec2-user@$ec2_ip << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/ubuntu.pem ubuntu@$ec2_ip << 'EOF'
             export DOCKER_USERNAME="${DOCKER_USERNAME}"
             export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
 
