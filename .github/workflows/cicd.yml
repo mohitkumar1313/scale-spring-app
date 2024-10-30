@@ -87,15 +87,15 @@ jobs:
           cat /tmp/ec2_ip.txt
 
       - name: Set EC2 IP in Environment
-        id: set_env_ip
         run: |
           if [ -f /tmp/ec2_ip.txt ]; then
-          echo "ec2_ip=$(cat /tmp/ec2_ip.txt)" >> $GITHUB_ENV
-          echo "::set-output name=ec2_ip::$(cat /tmp/ec2_ip.txt)"
+          ip=$(cat /tmp/ec2_ip.txt)
+          echo "ec2_ip=$ip" >> $GITHUB_ENV
           else
           echo "Error: /tmp/ec2_ip.txt does not exist" >&2
           exit 1
           fi
+
           
   deploy_to_ec2:
     runs-on: ubuntu-latest
