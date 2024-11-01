@@ -34,7 +34,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_NAMESPACE }}/scale-app:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/scale-app:latest
 
   terraform:
     runs-on: ubuntu-latest
@@ -104,17 +104,13 @@ jobs:
     steps:
       - name: Wait for EC2 instance to complete setup
         run: sleep 180
-        
+
       - name: Set EC2 IP Environment Variable
         run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
 
-      - name: Set EC2 IP Environment Variable
-        env:
-          ec2_ip: ${{ needs.terraform.outputs.ec2_ip }}
+      - name: Verify EC2 IP in Environment
         run: | 
-          echo "Deploying to EC2 IP: $ec2_ip"
-
-
+          echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
 
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
@@ -132,11 +128,15 @@ jobs:
       - name: Deploy to EC2
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          ec2_ip: ${{ env.ec2_ip }}
         run: |
-          echo "Starting deployment to EC2 IP: ${{ env.ec2_ip }}"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@${{ env.ec2_ip }} << 'EOF'
-            export DOCKER_USERNAME="${DOCKER_USERNAME}"
-      
-            # Run the Docker container on the specified port
-            docker run -d -p 8081:8081 --name scale-app mohitsalgotra/scale-app:latest
-            EOF
+          echo "Starting deployment to EC2 IP: $ec2_ip"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip << 'EOF'
+            # Construct the Docker image name using the environment variable
+            IMAGE="$DOCKER_USERNAME/scale-app:latest"
+            echo "Pulling image: $IMAGE"
+            
+            # Pull and run the Docker container
+            docker pull "$IMAGE"
+            docker run -d -p 8081:8081 --name scale-app "$IMAGE"
+          EOF
