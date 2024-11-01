@@ -97,46 +97,50 @@ jobs:
             exit 1
           fi
 
-  deploy_to_ec2:
-    runs-on: ubuntu-latest
-    needs: terraform
-    environment: "prod"
-    steps:
-      - name: Set EC2 IP Environment Variable
-        run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
+  # deploy_to_ec2:
+  #   runs-on: ubuntu-latest
+  #   needs: terraform
+  #   environment: "prod"
+  #   steps:
+  #     - name: Set EC2 IP Environment Variable
+  #       run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
 
-      - name: Verify EC2 IP in Environment
-        run: echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
+  #     - name: Set EC2 IP Environment Variable
+  #       env:
+  #         ec2_ip: ${{ needs.terraform.outputs.ec2_ip }}
+  #       run: echo "Deploying to EC2 IP: $ec2_ip"
 
-      - name: Ensure .ssh directory exists
-        run: mkdir -p ~/.ssh
 
-      - name: Add EC2 to known hosts
-        run: ssh-keyscan -H "${{ env.ec2_ip }}" >> ~/.ssh/known_hosts
 
-      - name: Copy SSH Key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/scale-app.pem
-          chmod 600 ~/.ssh/scale-app.pem
+  #     - name: Ensure .ssh directory exists
+  #       run: mkdir -p ~/.ssh
 
-      - name: Deploy to EC2
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          echo "Starting deployment to EC2 IP: ${{ env.ec2_ip }}"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@${{ env.ec2_ip }} << 'EOF'
-            export DOCKER_USERNAME="${DOCKER_USERNAME}"
-            export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
+  #     - name: Add EC2 to known hosts
+  #       run: ssh-keyscan -H "${{ env.ec2_ip }}" >> ~/.ssh/known_hosts
 
-            # Login to Docker
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  #     - name: Copy SSH Key
+  #       env:
+  #         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+  #       run: |
+  #         echo "$SSH_PRIVATE_KEY" > ~/.ssh/scale-app.pem
+  #         chmod 600 ~/.ssh/scale-app.pem
 
-            # Pull and run the Docker image
-            docker pull $DOCKER_USERNAME/scale-app:latest
-            docker stop scale-app || true
-            docker rm scale-app || true
-            docker run -d --name scale-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
-          EOF
+  #     - name: Deploy to EC2
+  #       env:
+  #         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  #       run: |
+  #         echo "Starting deployment to EC2 IP: ${{ env.ec2_ip }}"
+  #         ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@${{ env.ec2_ip }} << 'EOF'
+  #           export DOCKER_USERNAME="${DOCKER_USERNAME}"
+  #           export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
+
+  #           # Login to Docker
+  #           echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+  #           # Pull and run the Docker image
+  #           docker pull $DOCKER_USERNAME/scale-app:latest
+  #           docker stop scale-app || true
+  #           docker rm scale-app || true
+  #           docker run -d --name scale-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
+  #         EOF
