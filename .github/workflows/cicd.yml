@@ -90,7 +90,7 @@ jobs:
         id: set_ec2_ip
         run: |
           if [ -s /tmp/ec2_ip.txt ]; then
-            ip=$(grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' /tmp/ec2_ip.txt | -d '[:space:]' )
+            ip=$(grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' /tmp/ec2_ip.txt | xargs )
             echo "ec2_ip=$ip" >> $GITHUB_OUTPUT
           else
             echo "Error: /tmp/ec2_ip.txt is empty or does not contain a valid IP" >&2
