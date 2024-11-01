@@ -152,7 +152,5 @@ jobs:
 
             # Pull and run the Docker image
             docker pull $DOCKER_USERNAME/scale-app:latest
-            docker stop scale-app || true
-            docker rm scale-app || true
-            docker run -d --name scale-app -p 8080:8080 $DOCKER_USERNAME/scale-app:latest
+            docker run -d --name scale-app -p 8081:8081 $DOCKER_USERNAME/scale-app:latest
           EOF
