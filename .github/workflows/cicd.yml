@@ -130,13 +130,12 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           ec2_ip: ${{ env.ec2_ip }}
         run: |
-          echo "Starting deployment to EC2 IP: $ec2_ip"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip << EOF
-            # Construct the Docker image name using the environment variable
-            IMAGE="\$DOCKER_USERNAME/scale-app:latest"
-            echo "Pulling image: $IMAGE"
-            
-            # Pull and run the Docker container
-            docker pull "$IMAGE"
-            docker run -d -p 8081:8081 --name scale-app "$IMAGE"
+         echo "Starting deployment to EC2 IP: $ec2_ip"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip <<EOF
+          # Use a hardcoded Docker image name for debugging
+            echo "Pulling image: mohitsalgotra/scale-app:latest"
+          
+          # Pull and run the Docker container
+            docker pull mohitsalgotra/scale-app:latest
+            docker run -d -p 8081:8081 --name scale-app mohitsalgotra/scale-app:latest
           EOF
