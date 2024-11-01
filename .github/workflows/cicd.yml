@@ -136,14 +136,7 @@ jobs:
           echo "Starting deployment to EC2 IP: ${{ env.ec2_ip }}"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@${{ env.ec2_ip }} << 'EOF'
             export DOCKER_USERNAME="${DOCKER_USERNAME}"
-
-            # Define the Docker image with username included
-            IMAGE="$DOCKER_USERNAME/scale-app:latest"
-            echo "Pulling image: $IMAGE"
-        
-            # Pull the Docker image
-            docker pull "$IMAGE" || { echo "Failed to pull Docker image"; exit 1; }
       
             # Run the Docker container on the specified port
-            docker run -d -p 8081:8081 --name scale-app "$IMAGE" || { echo "Failed to start Docker container"; exit 1; }
+            docker run -d -p 8081:8081 --name scale-app mohitsalgotra/scale-app:latest
             EOF
