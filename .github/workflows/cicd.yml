@@ -148,9 +148,9 @@ jobs:
             # fi
 
             # Login to Docker
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password "$DOCKER_PASSWORD"
 
             # Pull and run the Docker image
             docker pull $DOCKER_USERNAME/scale-app:latest
-            docker run -d --name scale-app -p 8081:8081 $DOCKER_USERNAME/scale-app:latest
+            docker run -d -p 8081:8081 $DOCKER_USERNAME/scale-app:latest
           EOF
