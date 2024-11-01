@@ -102,6 +102,9 @@ jobs:
     needs: terraform
     environment: "prod"
     steps:
+      - name: Wait for EC2 instance to complete setup
+        run: sleep 180
+        
       - name: Set EC2 IP Environment Variable
         run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
 
