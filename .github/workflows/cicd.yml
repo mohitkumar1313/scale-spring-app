@@ -109,8 +109,7 @@ jobs:
         run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
 
       - name: Verify EC2 IP in Environment
-        run: | 
-          echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
+        run: echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
 
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
@@ -125,17 +124,15 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/scale-app.pem
           chmod 600 ~/.ssh/scale-app.pem
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 with Dynamic Image Reference
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/scale-app:latest
           ec2_ip: ${{ env.ec2_ip }}
         run: |
-         echo "Starting deployment to EC2 IP: $ec2_ip"
+          echo "Starting deployment to EC2 IP: $ec2_ip"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip <<EOF
-          # Use a hardcoded Docker image name for debugging
-            echo "Pulling image: mohitsalgotra/scale-app:latest"
-          
-          # Pull and run the Docker container
-            docker pull mohitsalgotra/scale-app:latest
-            docker run -d -p 8081:8081 --name scale-app mohitsalgotra/scale-app:latest
+            # Pull and run the Docker container with the full image reference
+            echo "Pulling image: \$DOCKER_IMAGE"
+            docker pull "\$DOCKER_IMAGE"
+            docker run -d -p 8081:8081 --name scale-app "\$DOCKER_IMAGE"
           EOF
