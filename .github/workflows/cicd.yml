@@ -109,7 +109,8 @@ jobs:
         run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
 
       - name: Verify EC2 IP in Environment
-        run: echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
+        run: | 
+          echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
 
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
