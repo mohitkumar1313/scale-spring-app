@@ -90,7 +90,7 @@ jobs:
         id: set_ec2_ip
         run: |
           if [ -s /tmp/ec2_ip.txt ]; then
-            ip=$(grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' /tmp/ec2_ip.txt | xargs )
+            ip=$(grep -m 1 -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' /tmp/ec2_ip.txt | xargs)
             echo "ec2_ip=$ip" >> $GITHUB_OUTPUT
           else
             echo "Error: /tmp/ec2_ip.txt is empty or does not contain a valid IP" >&2
@@ -104,6 +104,9 @@ jobs:
     steps:
       - name: Set EC2 IP Environment Variable
         run: echo "ec2_ip=${{ needs.terraform.outputs.ec2_ip }}" >> $GITHUB_ENV
+
+      - name: Verify EC2 IP in Environment
+        run: echo "Deploying to EC2 IP: ${{ env.ec2_ip }}"
 
       - name: Ensure .ssh directory exists
         run: mkdir -p ~/.ssh
@@ -123,8 +126,8 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo "Starting deployment to EC2 IP: $ec2_ip"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip << 'EOF'
+          echo "Starting deployment to EC2 IP: ${{ env.ec2_ip }}"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@${{ env.ec2_ip }} << 'EOF'
             export DOCKER_USERNAME="${DOCKER_USERNAME}"
             export DOCKER_PASSWORD="${DOCKER_PASSWORD}"
 
