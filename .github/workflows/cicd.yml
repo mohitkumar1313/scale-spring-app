@@ -131,9 +131,9 @@ jobs:
           ec2_ip: ${{ env.ec2_ip }}
         run: |
           echo "Starting deployment to EC2 IP: $ec2_ip"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/scale-app.pem ubuntu@$ec2_ip << EOF
             # Construct the Docker image name using the environment variable
-            IMAGE="$DOCKER_USERNAME/scale-app:latest"
+            IMAGE="\$DOCKER_USERNAME/scale-app:latest"
             echo "Pulling image: $IMAGE"
             
             # Pull and run the Docker container
